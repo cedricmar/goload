@@ -1,61 +1,53 @@
 package main // import "github.com/weebagency/goload/cmd/goload"
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
+	"os/exec"
+
+	"github.com/weebagency/goload/pkg/looper"
 )
 
 func main() {
-	// Get root folder
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		log.Fatal(err)
+
+	if len(os.Args) > 1 {
+		if os.Args[1] == "loop" {
+			looper.Loop()
+		}
+		return
 	}
-	log.Printf(">>> Observing %s\n", dir)
 
-	// Get the time
-	start := time.Now()
-	log.Printf(">>> Start time %s", start)
-	var chg bool
-	for !chg {
-		select {
-		case <-time.After(600 * time.Millisecond):
+	for {
+		// Start a process:
+		loopCmd := exec.Command("goload", "loop")
+		buildCmd := exec.Command("vgo", "install", "./cmd/goload")
 
-			chg, err = hasChanged(dir, start)
+		loopCmd.Stdout = os.Stdout
+		loopCmd.Stderr = os.Stderr
 
-			if err != nil {
-				log.Fatal(err)
-			}
+		buildCmd.Stdout = os.Stdout
+		buildCmd.Stderr = os.Stderr
 
+		err := loopCmd.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = loopCmd.Wait()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println("reload...")
+
+		err = buildCmd.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = buildCmd.Wait()
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
-
-	log.Println("reload...")
-}
-
-func hasChanged(path string, start time.Time) (bool, error) {
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return false, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() && !strings.HasPrefix(file.Name(), ".") {
-			if start.Sub(file.ModTime()) < 0 {
-				log.Printf("Folder %s last modified %s\n", file.Name(), file.ModTime())
-				return true, nil
-			}
-			return hasChanged(path+"/"+file.Name(), start)
-		}
-		if start.Sub(file.ModTime()) < 0 {
-			log.Printf("File %s last modified %s\n", file.Name(), file.ModTime())
-			return true, nil
-		}
-	}
-
-	return false, nil
 }
