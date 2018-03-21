@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var chg bool
-
 // Loop does not return, it just blocks until a change happens
 func Loop() {
 
@@ -27,7 +25,6 @@ func Loop() {
 	for !mod {
 		select {
 		case <-time.After(500 * time.Millisecond):
-			chg = false
 			mod, err = hasChanged(dir, start)
 
 			if err != nil {
