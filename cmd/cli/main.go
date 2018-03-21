@@ -1,7 +1,6 @@
-package main // import "github.com/weebagency/goload"
+package main // import "github.com/weebagency/goload/cmd/cli"
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,7 +34,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("reload...")
+	log.Println("reload...")
 }
 
 func hasChanged(path string, start time.Time) (bool, error) {
@@ -46,10 +45,14 @@ func hasChanged(path string, start time.Time) (bool, error) {
 
 	for _, file := range files {
 		if file.IsDir() && !strings.HasPrefix(file.Name(), ".") {
+			if start.Sub(file.ModTime()) < 0 {
+				log.Printf("Folder %s last modified %s\n", file.Name(), file.ModTime())
+				return true, nil
+			}
 			return hasChanged(path+"/"+file.Name(), start)
 		}
 		if start.Sub(file.ModTime()) < 0 {
-			fmt.Printf("File %s last modified %s\n", file.Name(), file.ModTime())
+			log.Printf("File %s last modified %s\n", file.Name(), file.ModTime())
 			return true, nil
 		}
 	}
