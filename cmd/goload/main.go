@@ -1,4 +1,4 @@
-package main // import "github.com/weebagency/goload/cmd/cli"
+package main // import "github.com/weebagency/goload/cmd/goload"
 
 import (
 	"io/ioutil"
