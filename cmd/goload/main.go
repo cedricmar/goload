@@ -1,9 +1,13 @@
 package main // import "github.com/weebagency/goload/cmd/goload"
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/weebagency/goload/pkg/looper"
 )
@@ -18,9 +22,22 @@ func main() {
 	}
 
 	for {
+		// Get the config
+		file, err := ioutil.ReadFile("config.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var rawConfig map[string]*json.RawMessage
+		if err = json.Unmarshal(file, &rawConfig); err != nil {
+			log.Fatal(err)
+		}
+
+		config := fmt.Sprintf("./%s", strings.Trim(string(*rawConfig["main_dir"]), "\""))
+
 		// Start a process:
 		loopCmd := exec.Command("goload", "loop")
-		buildCmd := exec.Command("vgo", "install", "./cmd/goload")
+		buildCmd := exec.Command("vgo", "install", config)
 
 		loopCmd.Stdout = os.Stdout
 		loopCmd.Stderr = os.Stderr
@@ -28,7 +45,7 @@ func main() {
 		buildCmd.Stdout = os.Stdout
 		buildCmd.Stderr = os.Stderr
 
-		err := loopCmd.Start()
+		err = loopCmd.Start()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -40,14 +57,8 @@ func main() {
 
 		log.Println("reload...")
 
-		err = buildCmd.Start()
-		if err != nil {
-			log.Fatal(err)
-		}
+		_ = buildCmd.Start()
 
-		err = buildCmd.Wait()
-		if err != nil {
-			log.Fatal(err)
-		}
+		_ = buildCmd.Wait()
 	}
 }
