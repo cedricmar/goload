@@ -55,7 +55,7 @@ func main() {
 
 		// Start a process:
 		loopCmd := exec.Command("goload", "loop")
-		buildCmd := exec.Command("vgo", "build", "-o", "./tmp/prg", config)
+		buildCmd := exec.Command("CC=gcc", "vgo", "build", "-o", "./tmp/prg", config)
 
 		loopCmd.Stdout = os.Stdout
 		loopCmd.Stderr = os.Stderr
