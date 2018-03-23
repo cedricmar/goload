@@ -41,6 +41,10 @@ func hasChanged(path string, start time.Time) (bool, error) {
 
 	err := filepath.Walk(path, func(path string, file os.FileInfo, err error) error {
 
+		if file.IsDir() && file.Name() == "tmp" {
+			return filepath.SkipDir
+		}
+
 		if start.Sub(file.ModTime()) < 0 && !strings.HasPrefix(file.Name(), ".") {
 			chg = true
 		}

@@ -26,10 +26,12 @@ func main() {
 				log.Fatal(err)
 			}
 
-			/*err = loopCmd.Wait()
-			if err != nil {
-				log.Fatal(err)
-			}*/
+			/*
+				err = prgCmd.Wait()
+				if err != nil {
+					log.Fatal(err)
+				}
+			*/
 
 			looper.Loop() // Blocking
 
@@ -61,6 +63,10 @@ func main() {
 		buildCmd.Stdout = os.Stdout
 		buildCmd.Stderr = os.Stderr
 
+		_ = buildCmd.Start()
+
+		_ = buildCmd.Wait()
+
 		err = loopCmd.Start()
 		if err != nil {
 			log.Fatal(err)
@@ -73,8 +79,5 @@ func main() {
 
 		log.Println("reload...")
 
-		_ = buildCmd.Start()
-
-		_ = buildCmd.Wait()
 	}
 }
