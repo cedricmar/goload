@@ -16,6 +16,9 @@ func main() {
 
 	if len(os.Args) > 1 {
 		if os.Args[1] == "loop" {
+
+			log.Println("looping...")
+
 			prgCmd := exec.Command("./tmp/prg")
 
 			prgCmd.Stdout = os.Stdout
@@ -34,6 +37,10 @@ func main() {
 			*/
 
 			looper.Loop() // Blocking
+
+			if err := prgCmd.Process.Kill(); err != nil {
+				log.Println("failed to kill process: ", err)
+			}
 
 		}
 		return
@@ -54,18 +61,29 @@ func main() {
 		config := fmt.Sprintf("./%s", strings.Trim(string(*rawConfig["main_dir"]), "\""))
 
 		// Start a process:
-		loopCmd := exec.Command("goload", "loop")
-		buildCmd := exec.Command("CC=gcc", "vgo", "build", "-o", "./tmp/prg", config)
 
-		loopCmd.Stdout = os.Stdout
-		loopCmd.Stderr = os.Stderr
+		buildCmd := exec.Command("vgo", "build", "-o", "./tmp/prg", config)
 
 		buildCmd.Stdout = os.Stdout
 		buildCmd.Stderr = os.Stderr
 
-		_ = buildCmd.Start()
+		log.Println("Running", "CC=gcc", "&&", "vgo", "build", "-x", "-o", "./tmp/prg", config)
 
-		_ = buildCmd.Wait()
+		err = buildCmd.Start()
+		if err != nil {
+			log.Println(err)
+		}
+
+		err = buildCmd.Wait()
+		if err != nil {
+			log.Println(err)
+		}
+
+		log.Println("Running loop")
+		loopCmd := exec.Command("goload", "loop")
+
+		loopCmd.Stdout = os.Stdout
+		loopCmd.Stderr = os.Stderr
 
 		err = loopCmd.Start()
 		if err != nil {
