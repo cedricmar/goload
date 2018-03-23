@@ -16,7 +16,23 @@ func main() {
 
 	if len(os.Args) > 1 {
 		if os.Args[1] == "loop" {
-			looper.Loop()
+			prgCmd := exec.Command("./tmp/prg")
+
+			prgCmd.Stdout = os.Stdout
+			prgCmd.Stderr = os.Stderr
+
+			err := prgCmd.Start()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			/*err = loopCmd.Wait()
+			if err != nil {
+				log.Fatal(err)
+			}*/
+
+			looper.Loop() // Blocking
+
 		}
 		return
 	}
@@ -37,7 +53,7 @@ func main() {
 
 		// Start a process:
 		loopCmd := exec.Command("goload", "loop")
-		buildCmd := exec.Command("vgo", "install", config)
+		buildCmd := exec.Command("vgo", "build", "-o", "./tmp/prg", config)
 
 		loopCmd.Stdout = os.Stdout
 		loopCmd.Stderr = os.Stderr
