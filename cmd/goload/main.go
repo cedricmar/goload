@@ -7,7 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/cedricmar/goload/pkg/config"
-	"github.com/weebagency/goload/pkg/looper"
+	"github.com/cedricmar/goload/pkg/looper"
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 	for {
 		// Get the config
 		c := config.LoadConfig()
-		dir := "./" + c.Get("main_dir")
+		dir := "./" + c.GetMainDir()
 
 		fmt.Println(dir)
 

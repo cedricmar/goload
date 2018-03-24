@@ -1,1 +1,1 @@
-module "github.com/weebagency/goload"
+module "github.com/cedricmar/goload"
