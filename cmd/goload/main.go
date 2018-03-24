@@ -1,14 +1,12 @@
-package main // import "github.com/weebagency/goload/cmd/goload"
+package main // import "github.com/cedricmar/goload/cmd/goload"
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 
+	"github.com/cedricmar/goload/pkg/config"
 	"github.com/weebagency/goload/pkg/looper"
 )
 
@@ -48,28 +46,21 @@ func main() {
 
 	for {
 		// Get the config
-		file, err := ioutil.ReadFile("config.json")
-		if err != nil {
-			log.Fatal(err)
-		}
+		c := config.LoadConfig()
+		dir := "./" + c.Get("main_dir")
 
-		var rawConfig map[string]*json.RawMessage
-		if err = json.Unmarshal(file, &rawConfig); err != nil {
-			log.Fatal(err)
-		}
-
-		config := fmt.Sprintf("./%s", strings.Trim(string(*rawConfig["main_dir"]), "\""))
+		fmt.Println(dir)
 
 		// Start a process:
 
-		buildCmd := exec.Command("vgo", "build", "-o", "./tmp/prg", config)
+		buildCmd := exec.Command("vgo", "build", "-o", "./tmp/prg", dir)
 
 		buildCmd.Stdout = os.Stdout
 		buildCmd.Stderr = os.Stderr
 
-		log.Println("Running", "CC=gcc", "&&", "vgo", "build", "-x", "-o", "./tmp/prg", config)
+		log.Println("Running", "CC=gcc", "&&", "vgo", "build", "-x", "-o", "./tmp/prg", dir)
 
-		err = buildCmd.Start()
+		err := buildCmd.Start()
 		if err != nil {
 			log.Println(err)
 		}

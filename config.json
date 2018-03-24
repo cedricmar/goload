@@ -1,3 +1,4 @@
 {
-    "main_dir": "cmd/goload"
+    "main_dir": "cmd/goload",
+    "color": "red"
 }
